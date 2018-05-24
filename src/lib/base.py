@@ -2,6 +2,7 @@
 from __future__ import print_function
 
 import re
+import time
 
 from slackclient import SlackClient
 from functions import fail_unless
@@ -32,6 +33,12 @@ class Base(object): # pylint: disable=too-few-public-methods,too-many-instance-a
         """Interface to Slack API"""
         api_response = self.slack_client.api_call(method, **kwargs)
         response_status = api_response.get("ok", False)
+        if response_status is False:
+            retry_after = int(api_response.get("headers", {}).get("Retry-After", "0"))
+            if retry_after > 0:
+                time.sleep(int(retry_after))
+                api_response = self._call_api(method, **kwargs)
+                response_status = api_response.get("ok", False)
         fail_unless(response_status, "Slack API Call failed. method={} response={}".format(method, api_response))
         return api_response
 
