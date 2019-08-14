@@ -33,7 +33,8 @@ class In(Base):
         """Concourse resource `in` logic """
         message = list_get(self._get_single_msg(self.version["id_ts"])["messages"], 0, {})
         self.original_msg = message.get("text")
-        user = self._filter(self.users['members'], "name", "id", message.get("user"))
+        # user = self._filter(self.users['members'], "name", "id", message.get("user"))
+        user = "UserNotSupported"
         if self.template:
             regex = self._msg_grammar(self.original_msg)
             self.templated_string = template_with_regex(self.template, regex, user=user)

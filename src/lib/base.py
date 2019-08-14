@@ -13,16 +13,19 @@ class Base(object): # pylint: disable=too-few-public-methods,too-many-instance-a
     def __init__(self, **kwargs):
         self.slack_client = SlackClient(kwargs.get("slack_token"))
         self.bot = kwargs.get("bot_name")
+        self.bot_id = kwargs.get("bot_id")
         self.channel = kwargs.get("channel")
         self.grammar = kwargs.get("grammar")
         self.version = kwargs.get("version")
         self.working_dir = kwargs.get("working_dir")
         self.slack_unread = kwargs.get("slack_unread")
-        self.users = self._call_api("users.list", presence=0)
+        # self.users = self._call_api("users.list", presence=0)
         self.mention = kwargs.get("mention")
         if self.mention:
-            self.bot_id = self._filter(self.users['members'], "id", "name", self.bot)
-            fail_unless(self.bot_id, "Unable to find bot name '{}'".format(self.bot))
+            if not self.bot_id:
+                self.users = self._call_api("users.list", presence=0)
+                self.bot_id = self._filter(self.users['members'], "id", "name", self.bot)
+                fail_unless(self.bot_id, "Unable to find bot name '{}'".format(self.bot))
         if not self.grammar and not self.mention:
             fail_unless(False, "At least one parameter is required 'grammar', 'mention'.")
 
